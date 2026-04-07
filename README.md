@@ -1,1 +1,725 @@
-# Sprint-1
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Restock Prototype</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --warn: #d97706;
+      --success: #059669;
+      --border: #dbe3ee;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .app-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.9rem;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .role-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      padding: 12px 14px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .role-switcher select,
+    .field input,
+    .field select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.98rem;
+      background: #fff;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 22px;
+    }
+
+    .sidebar,
+    .content-card,
+    .metric,
+    .table-card,
+    .request-card,
+    .empty-card,
+    .notice {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 18px;
+      height: fit-content;
+      position: sticky;
+      top: 18px;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      margin-bottom: 10px;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f8fbff;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 0.98rem;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: #e8f0ff;
+      border-color: #bcd0fb;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .content-card {
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .content-card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.55rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 18px 0 24px;
+    }
+
+    .metric {
+      padding: 18px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.9rem;
+      font-weight: bold;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button,
+    .button-link {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 0.96rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s ease;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .primary:hover { background: var(--primary-hover); }
+
+    .secondary {
+      background: #edf2ff;
+      color: #24428f;
+      border: 1px solid #cad6ff;
+    }
+
+    .secondary:hover { background: #e2eaff; }
+
+    .danger {
+      background: #fff1f2;
+      color: var(--danger);
+      border: 1px solid #fecdd3;
+    }
+
+    .success {
+      background: #ecfdf5;
+      color: var(--success);
+      border: 1px solid #a7f3d0;
+    }
+
+    .warn {
+      background: #fff7ed;
+      color: var(--warn);
+      border: 1px solid #fed7aa;
+    }
+
+    .table-card,
+    .request-card,
+    .empty-card,
+    .notice {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 10px;
+      border-bottom: 1px solid #ebf0f6;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: bold;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .status-in-stock {
+      background: #ecfdf5;
+      color: var(--success);
+    }
+
+    .status-low {
+      background: #fff7ed;
+      color: var(--warn);
+    }
+
+    .status-pending {
+      background: #eff6ff;
+      color: var(--primary);
+    }
+
+    .status-approved {
+      background: #ecfdf5;
+      color: var(--success);
+    }
+
+    .status-rejected {
+      background: #fff1f2;
+      color: var(--danger);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 10px 0 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .screen-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .request-card h3,
+    .table-card h3,
+    .empty-card h3,
+    .notice h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 920px) {
+      .layout,
+      .screen-row {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">
+        <h1>StockFlow Prototype</h1>
+        <p>Inventory and restock request system for Sprint 1.</p>
+      </div>
+      <div class="role-switcher">
+        <label for="roleSelect"><strong>User Role:</strong></label>
+        <select id="roleSelect">
+          <option value="sales">Sales Representative</option>
+          <option value="manager">Inventory Manager</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <h3>Navigation</h3>
+        <button class="nav-btn active" data-screen="home">Home</button>
+        <button class="nav-btn" data-screen="inventory">View Inventory</button>
+        <button class="nav-btn" data-screen="low-stock">Check Low Stock</button>
+        <button class="nav-btn sales-only" data-screen="request">Submit Restock Request</button>
+        <button class="nav-btn" data-screen="requests">Track Requests</button>
+        <button class="nav-btn manager-only hidden" data-screen="manager">Approve Requests</button>
+      </aside>
+
+      <main class="main">
+        <section id="home" class="screen active">
+          <div class="content-card">
+            <h2>Welcome</h2>
+            <p class="subtitle">This starter prototype supports your main Sprint 1 use cases: viewing inventory, checking low stock items, submitting restock requests, and tracking request status. It also previews role-based access for sales representatives and inventory managers.</p>
+            <div class="metric-grid">
+              <div class="metric">
+                <div class="metric-label">Total Products</div>
+                <div class="metric-value" id="metricTotalProducts">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Low Stock Items</div>
+                <div class="metric-value" id="metricLowStock">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Pending Requests</div>
+                <div class="metric-value" id="metricPending">0</div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary" onclick="goToScreen('inventory')">Open Inventory</button>
+              <button class="secondary" onclick="goToScreen('low-stock')">Review Low Stock</button>
+              <button class="secondary sales-only" onclick="goToScreen('request')">Create Request</button>
+              <button class="secondary" onclick="goToScreen('requests')">Track Requests</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="inventory" class="screen">
+          <div class="content-card">
+            <h2>Inventory Overview</h2>
+            <p class="subtitle">Users can view current stock levels and quickly identify which items need attention.</p>
+            <div class="table-card">
+              <h3>Current Product Inventory</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="low-stock" class="screen">
+          <div class="content-card">
+            <h2>Low Stock Items</h2>
+            <p class="subtitle">This screen helps users identify products that should be restocked before shortages happen.</p>
+            <div id="lowStockList"></div>
+          </div>
+        </section>
+
+        <section id="request" class="screen">
+          <div class="content-card">
+            <h2>Submit Restock Request</h2>
+            <p class="subtitle">Sales representatives can create a new restock request for low inventory items.</p>
+            <div class="screen-row">
+              <div class="request-card">
+                <h3>New Request Form</h3>
+                <form id="requestForm">
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="productSelect">Product</label>
+                      <select id="productSelect"></select>
+                    </div>
+                    <div class="field">
+                      <label for="quantityInput">Requested Quantity</label>
+                      <input id="quantityInput" type="number" min="1" placeholder="Enter quantity" required />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="reasonInput">Reason</label>
+                    <input id="reasonInput" type="text" placeholder="Example: prepare for sales event" required />
+                  </div>
+                  <p class="helper">Error prevention: the form only allows valid quantity input and requires the user to choose a product before submitting.</p>
+                  <div class="actions" style="margin-top: 18px;">
+                    <button type="submit" class="primary">Submit Request</button>
+                    <button type="button" class="secondary" onclick="clearForm()">Clear</button>
+                  </div>
+                </form>
+              </div>
+              <div class="notice" id="formNotice">
+                <h3>How this works</h3>
+                <p class="small">The submitted request will appear on the Track Requests screen with a pending status. If you switch to Inventory Manager, you can approve or reject it there.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="requests" class="screen">
+          <div class="content-card">
+            <h2>Track Requests</h2>
+            <p class="subtitle">Users can review submitted requests and see whether each request is pending, approved, or rejected.</p>
+            <div id="requestList"></div>
+          </div>
+        </section>
+
+        <section id="manager" class="screen">
+          <div class="content-card">
+            <h2>Approve or Reject Requests</h2>
+            <p class="subtitle">This manager-only screen shows role-based access by allowing a second user type to update request status and inventory levels.</p>
+            <div id="managerRequestList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const inventory = [
+      { id: 1, name: 'Widget A', stock: 10, threshold: 8 },
+      { id: 2, name: 'Gadget B', stock: 5, threshold: 10 },
+      { id: 3, name: 'Item C', stock: 80, threshold: 15 },
+      { id: 4, name: 'Part D', stock: 3, threshold: 8 }
+    ];
+
+    const requests = [
+      { id: 101, productId: 2, quantity: 20, reason: 'low stock before weekend sale', status: 'Pending', submittedBy: 'Sales Representative' },
+      { id: 102, productId: 4, quantity: 25, reason: 'backroom supply is almost empty', status: 'Approved', submittedBy: 'Sales Representative' }
+    ];
+
+    const roleSelect = document.getElementById('roleSelect');
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const screens = document.querySelectorAll('.screen');
+    const productSelect = document.getElementById('productSelect');
+    const requestForm = document.getElementById('requestForm');
+
+    function getProduct(productId) {
+      return inventory.find(item => item.id === productId);
+    }
+
+    function isLowStock(item) {
+      return item.stock <= item.threshold;
+    }
+
+    function statusClass(status) {
+      if (status === 'In Stock') return 'status-in-stock';
+      if (status === 'Low Stock') return 'status-low';
+      if (status === 'Pending') return 'status-pending';
+      if (status === 'Approved') return 'status-approved';
+      return 'status-rejected';
+    }
+
+    function goToScreen(screenId) {
+      const currentRole = roleSelect.value;
+      if (screenId === 'manager' && currentRole !== 'manager') return;
+      if (screenId === 'request' && currentRole !== 'sales') return;
+
+      screens.forEach(screen => screen.classList.remove('active'));
+      navButtons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(screenId).classList.add('active');
+      const selectedNav = document.querySelector(`.nav-btn[data-screen="${screenId}"]`);
+      if (selectedNav) selectedNav.classList.add('active');
+    }
+
+    function renderMetrics() {
+      document.getElementById('metricTotalProducts').textContent = inventory.length;
+      document.getElementById('metricLowStock').textContent = inventory.filter(isLowStock).length;
+      document.getElementById('metricPending').textContent = requests.filter(r => r.status === 'Pending').length;
+    }
+
+    function renderInventory() {
+      const body = document.getElementById('inventoryTableBody');
+      body.innerHTML = '';
+
+      inventory.forEach(item => {
+        const status = isLowStock(item) ? 'Low Stock' : 'In Stock';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.stock}</td>
+          <td><span class="status-pill ${statusClass(status)}">${status}</span></td>
+          <td>
+            ${isLowStock(item) ? `<button class="secondary" onclick="prefillRequest(${item.id})">Restock</button>` : `<span class="small">No action needed</span>`}
+          </td>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    function renderLowStock() {
+      const wrapper = document.getElementById('lowStockList');
+      const lowItems = inventory.filter(isLowStock);
+      wrapper.innerHTML = '';
+
+      if (!lowItems.length) {
+        wrapper.innerHTML = '<div class="empty-card"><h3>No low stock items</h3><p class="small">Everything is currently above the stock threshold.</p></div>';
+        return;
+      }
+
+      lowItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.innerHTML = `
+          <h3>${item.name}</h3>
+          <p class="small">Current Stock: <strong>${item.stock}</strong> | Low Stock Threshold: <strong>${item.threshold}</strong></p>
+          <div class="actions">
+            <button class="primary" onclick="prefillRequest(${item.id})">Restock This Item</button>
+            <button class="secondary" onclick="goToScreen('inventory')">View Full Inventory</button>
+          </div>
+        `;
+        wrapper.appendChild(card);
+      });
+    }
+
+    function renderProductOptions() {
+      productSelect.innerHTML = inventory
+        .map(item => `<option value="${item.id}">${item.name} (${item.stock} in stock)</option>`)
+        .join('');
+    }
+
+    function renderRequests() {
+      const wrapper = document.getElementById('requestList');
+      wrapper.innerHTML = '';
+
+      requests.forEach(req => {
+        const product = getProduct(req.productId);
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.innerHTML = `
+          <h3>Request #${req.id}</h3>
+          <p><strong>Product:</strong> ${product.name}</p>
+          <p><strong>Requested Quantity:</strong> ${req.quantity}</p>
+          <p><strong>Reason:</strong> ${req.reason}</p>
+          <p><strong>Status:</strong> <span class="status-pill ${statusClass(req.status)}">${req.status}</span></p>
+          <p class="small"><strong>Submitted By:</strong> ${req.submittedBy}</p>
+        `;
+        wrapper.appendChild(card);
+      });
+    }
+
+    function renderManagerRequests() {
+      const wrapper = document.getElementById('managerRequestList');
+      wrapper.innerHTML = '';
+
+      requests.forEach(req => {
+        const product = getProduct(req.productId);
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.innerHTML = `
+          <h3>Request #${req.id}</h3>
+          <p><strong>Product:</strong> ${product.name}</p>
+          <p><strong>Current Stock:</strong> ${product.stock}</p>
+          <p><strong>Request Quantity:</strong> ${req.quantity}</p>
+          <p><strong>Status:</strong> <span class="status-pill ${statusClass(req.status)}">${req.status}</span></p>
+          <div class="actions">
+            <button class="success" onclick="approveRequest(${req.id})" ${req.status !== 'Pending' ? 'disabled' : ''}>Approve</button>
+            <button class="danger" onclick="rejectRequest(${req.id})" ${req.status !== 'Pending' ? 'disabled' : ''}>Reject</button>
+          </div>
+        `;
+        wrapper.appendChild(card);
+      });
+    }
+
+    function prefillRequest(productId) {
+      if (roleSelect.value !== 'sales') {
+        alert('Switch to Sales Representative to submit a restock request.');
+        return;
+      }
+      productSelect.value = String(productId);
+      goToScreen('request');
+    }
+
+    function clearForm() {
+      requestForm.reset();
+      renderProductOptions();
+    }
+
+    function approveRequest(requestId) {
+      const req = requests.find(r => r.id === requestId);
+      if (!req || req.status !== 'Pending') return;
+      req.status = 'Approved';
+      const product = getProduct(req.productId);
+      product.stock += req.quantity;
+      refreshUI();
+    }
+
+    function rejectRequest(requestId) {
+      const req = requests.find(r => r.id === requestId);
+      if (!req || req.status !== 'Pending') return;
+      req.status = 'Rejected';
+      refreshUI();
+    }
+
+    function updateRoleView() {
+      const role = roleSelect.value;
+      document.querySelectorAll('.sales-only').forEach(el => {
+        el.classList.toggle('hidden', role !== 'sales');
+      });
+      document.querySelectorAll('.manager-only').forEach(el => {
+        el.classList.toggle('hidden', role !== 'manager');
+      });
+
+      const currentActive = document.querySelector('.screen.active')?.id;
+      if (role === 'sales' && currentActive === 'manager') goToScreen('home');
+      if (role === 'manager' && currentActive === 'request') goToScreen('home');
+    }
+
+    function refreshUI() {
+      renderMetrics();
+      renderInventory();
+      renderLowStock();
+      renderProductOptions();
+      renderRequests();
+      renderManagerRequests();
+      updateRoleView();
+    }
+
+    requestForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const productId = Number(productSelect.value);
+      const quantity = Number(document.getElementById('quantityInput').value);
+      const reason = document.getElementById('reasonInput').value.trim();
+
+      if (!productId || quantity < 1 || !reason) {
+        alert('Please complete all fields before submitting.');
+        return;
+      }
+
+      const newRequest = {
+        id: Date.now(),
+        productId,
+        quantity,
+        reason,
+        status: 'Pending',
+        submittedBy: 'Sales Representative'
+      };
+
+      requests.unshift(newRequest);
+      refreshUI();
+      requestForm.reset();
+      renderProductOptions();
+      goToScreen('requests');
+    });
+
+    roleSelect.addEventListener('change', () => {
+      updateRoleView();
+    });
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => goToScreen(btn.dataset.screen));
+    });
+
+    refreshUI();
+  </script>
+</body>
+</html>
